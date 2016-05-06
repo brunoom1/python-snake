@@ -5,3 +5,7 @@ Requisitos
 
 - python
 - pygame
+
+Screenshot
+
+![Screenshot](https://github.com/brunoom1/python-snaker/blob/master/screenshot.png)
