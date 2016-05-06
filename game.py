@@ -8,8 +8,10 @@ from random import random
 
 class Game(pygame.Rect):
 
-	speed = 10
+	speed = 8
 	stage_blocks = []
+	pause_game = True
+	config = {}
 
 	def __init__(self, size, block_s, winstyle=0):
 
@@ -29,22 +31,26 @@ class Game(pygame.Rect):
 		
 		self.snake = model.Snake(self, block_s)
 
-		self.snake.addBlock(model.Block(self.snake, (0, 0)) )
-		self.snake.addBlock(model.Block(self.snake, (0, 0)) )
-		self.snake.addBlock(model.Block(self.snake, (0, 0)) )
-		self.snake.addBlock(model.Block(self.snake, (0, 0)) )
-		self.snake.addBlock(model.Block(self.snake, (0, 0)) )
-
 		self.eventManager = model.EventManager(self);
 		self.eventManager.start() 
 
-		self.offset = pygame.Surface(self.size);
+		self.screenBuffer = pygame.Surface(self.size);
+
+		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 6 * block_s)) )
+		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 5 * block_s)) )
+		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 4 * block_s)) )
+		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 3 * block_s)) )
+		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 2 * block_s)) )
 
 		# carrega primeiro stage
 		self.load_stage(0, 20)
 
+
 		block_free = False
+		count = 0
 		while(self.running):
+
+			self.screenBuffer.fill([0,0,0])
 
 			if(block_free == False):
 
@@ -55,20 +61,37 @@ class Game(pygame.Rect):
 					pos = ( int(random() * (self.size[0] / block_s)) * block_s , int(random() * (self.size[1] / block_s)) * block_s )
 					block_free = model.Block(False, pos)
 
-
-			self.offset.fill([0,0,0])
-			self.snake.move(self.snake.direct)
-			self.snake.paint(self.offset)
-
 			if(block_free != False):
-				block_free.paint(self.offset)
+				block_free.paint(self.screenBuffer)
 
 				if(self.snake.blocks[0].colliderect(block_free)):
 					self.snake.addBlock(block_free)
 					block_free = False
+					count += 1
+
+					if(count % 5 == 0):
+						self.speed += 1
+
+					print count
 
 			for block in self.stage_blocks:
-				block.paint(self.offset)
+				block.paint(self.screenBuffer)
+
+			self.snake.paint(self.screenBuffer)
+
+			# pass screenBuffer for real screen
+			self.screen.blit(self.screenBuffer, (0, 0))
+
+			# update display
+			pygame.display.flip();
+
+			if(self.pause_game): continue;
+
+
+			# move snaker
+			self.snake.move(self.snake.direct)
+
+			# test collision
 
 			index = self.snake.blocks[0].collidelist(self.stage_blocks)
 			index2 = self.snake.blocks[0].collidelist(self.snake.blocks[1:-1])
@@ -77,9 +100,6 @@ class Game(pygame.Rect):
 				if(isinstance(self.stage_blocks[index], model.Brick)):
 					self.running = False
 
-			self.screen.blit(self.offset, (0, 0))
-
-			pygame.display.flip();
 			self.clock.tick(self.speed)
 
 
@@ -90,8 +110,22 @@ class Game(pygame.Rect):
 	def load_stage(self, stage_number, block_s):
 		file_name = "stages/stage%d" % (stage_number)
 
+		########################################################################
+		# linha 1 - snake init: posx, posy, direction, total blocks init #
+		# linha 2 - speed game
+		# linha > 2 - map elements
+		#
+		########################################################################
+
 		f = file(file_name)
-		content = f.read();
+
+		line1 = f.readline().split(',')
+		line2 = f.readline().split(',')
+
+		self.config['snake'] = line1
+		self.config['game'] = line2
+
+		content = f.read()
 		f.close()
 
 		#  @ -> brick
