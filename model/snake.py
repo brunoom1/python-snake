@@ -9,51 +9,53 @@ class Snake(Object):
 	blocks = []
 
 	def __init__(self, game = "", step = 20):
-		Object.__init__(self, (step * 3, step * 3), (0 , 0))
+		Object.__init__(self, (0, 0), (0 , 0))
 		self.game = game;
 		self.step = step
 
 	def move(self, direct = 0):
-		self.direct = direct;
 
-		if(direct == 4):
-			return
-
-		if(self.direct == self.directions['top']):
+		if(self.direct == self.directions['top'] ):
 			self.y -= self.step
 
 			if(self.y < 0):
 				self.y = self.game.size[1] - self.step
 
-		if(self.direct == self.directions['right']):
+		if(self.direct == self.directions['right'] ):
 			self.x += self.step;
 
 			if(self.x + self.step > self.game.size[0]):
 				self.x = 0
 
-		if(self.direct == self.directions['bottom']):
+		if(self.direct == self.directions['bottom'] ):
 			self.y += self.step;
 
 			if(self.y + self.step > self.game.size[1]):
 				self.y = 0
 
-		if(self.direct == self.directions['left']):
+		if(self.direct == self.directions['left'] ):
 			self.x -= self.step;
 
 			if(self.x < 0 ):
 				self.x = self.game.size[0] - self.step
 
 		## move first block 
-		if(len(self.blocks) > 0): 
+		if(len(self.blocks) > 0 and direct != 4): 
 			self.blocks[0].move((self.x, self.y));
 
 	def setDirect(self, direct):
-		self.direct = direct
+
+		if( self.direct == self.directions['top'] 	 and direct != self.directions['bottom'] or \
+			self.direct == self.directions['bottom'] and direct != self.directions['top'] or \
+			self.direct == self.directions['left'] 	 and direct != self.directions['right'] or \
+			self.direct == self.directions['right']  and direct != self.directions['left']):
+			self.direct = direct
 
 	def addBlock(self, block):
 		total = len(self.blocks)
 		if (total == 0):
 			self.blocks.append(block)
+			self.setPos(block.getPos())
 		else:
 			self.blocks[total - 1].setSibling(block);
 			self.blocks.append(block)
