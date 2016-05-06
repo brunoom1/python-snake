@@ -1,4 +1,4 @@
-# python-snaker
+# python-snake
 Game usando python com o framework pygame.
 
 Requisitos
