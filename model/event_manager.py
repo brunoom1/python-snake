@@ -26,3 +26,6 @@ class EventManager(threading.Thread):
 					self.game.snake.setDirect(2);
 				elif( evt.key == 276):
 					self.game.snake.setDirect(3);
+
+				if(self.game.pause_game and evt.key == 32):
+					self.game.pause_game = False;
