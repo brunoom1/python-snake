@@ -5,11 +5,19 @@ from object import Object
 class Block(Object):
 	sibling = False
 	parent = False
+	borderColor = [200,200,200]
+	bgColor = [100,50,200]
 	i = 0
 
 	def __init__(self, parent, pos = (0,0), size = (20, 20)):
 		self.parent = parent;
 		Object.__init__(self, pos, size)
+
+	def setBorderColor(self, borderColor):
+		self.borderColor = borderColor
+
+	def setBgColor(self, bgColor):
+		self.bgColor = bgColor
 
 	def move(self, pos = ()):
 		old_pos = (self.x, self.y);
@@ -35,49 +43,16 @@ class Block(Object):
 
 	def paint(self, screen):
 		
-		if(self.parent):
-			pygame.draw.rect(screen, [200,200,200], pygame.Rect( \
-				self.x, \
-				self.y, \
-				self.width, \
-				self.height))
+		pygame.draw.rect(screen, self.borderColor, pygame.Rect( \
+			self.x, \
+			self.y, \
+			self.width, \
+			self.height))
 
-			pygame.draw.rect(screen, [100,50,200], pygame.Rect( \
-				self.x + 2, \
-				self.y + 2, \
-				self.width - 4, \
-				self.height - 4))
-		else:
-
-			if(self.i == 0):
-				self.i = 1
-			else: 
-				self.i = 0
-
-			if(self.i == 0):
-				pygame.draw.rect(screen, [200,200,200], pygame.Rect( \
-					self.x, \
-					self.y, \
-					self.width, \
-					self.height))
-
-				pygame.draw.rect(screen, [100,50,200], pygame.Rect( \
-					self.x + 2, \
-					self.y + 2, \
-					self.width - 4, \
-					self.height - 4))
-			else: 
-				pygame.draw.rect(screen, [255,255,255], pygame.Rect( \
-					self.x, \
-					self.y, \
-					self.width, \
-					self.height))
-
-				pygame.draw.rect(screen, [255,0,0], pygame.Rect( \
-					self.x + 2, \
-					self.y + 2, \
-					self.width - 4, \
-					self.height - 4))
-
+		pygame.draw.rect(screen, self.bgColor, pygame.Rect( \
+			self.x + 2, \
+			self.y + 2, \
+			self.width - 4, \
+			self.height - 4))
 
 
