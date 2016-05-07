@@ -55,24 +55,18 @@ class Game(pygame.Rect):
 			if(block_free == False):
 
 				pos = ( int(random() * (self.size[0] / block_s)) * block_s , int(random() * (self.size[1] / block_s)) * block_s )
-				block_free = model.Block(False, pos)
+				block_free = model.BlockFree(False, pos)
 
 				while(block_free.collidelist(self.stage_blocks) != -1):
 					pos = ( int(random() * (self.size[0] / block_s)) * block_s , int(random() * (self.size[1] / block_s)) * block_s )
-					block_free = model.Block(False, pos)
+					block_free = model.BlockFree(False, pos)
 
 			if(block_free != False):
 				block_free.paint(self.screenBuffer)
 
 				if(self.snake.blocks[0].colliderect(block_free)):
-					self.snake.addBlock(block_free)
+					self.snake.addBlock(model.Block([], block_free.getPos()))
 					block_free = False
-					count += 1
-
-					if(count % 5 == 0):
-						self.speed += 1
-
-					print count
 
 			for block in self.stage_blocks:
 				block.paint(self.screenBuffer)
