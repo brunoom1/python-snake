@@ -19,6 +19,12 @@ class Block(Object):
 	def setBgColor(self, bgColor):
 		self.bgColor = bgColor
 
+	def getBgColor(self):
+		return self.bgColor
+
+	def getBorderColor(self):
+		return self.borderColor
+
 	def move(self, pos = ()):
 		old_pos = (self.x, self.y);
 
