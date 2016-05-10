@@ -1,3 +1,5 @@
+import json
+
 ## snake model
 from block import Block
 from object import Object
@@ -7,11 +9,19 @@ class Snake(Object):
 	directions = { 'top': 0, 'right': 1, 'bottom': 2, 'left': 3 }
 	direct = directions['right']
 	blocks = []
+	snake_id = 0
 
 	def __init__(self, game = "", step = 20):
 		Object.__init__(self, (0, 0), (0 , 0))
 		self.game = game;
 		self.step = step
+		self.snake_id = 0
+
+	def setId(self, id):
+		self.snake_id = id
+
+	def getId(self):
+		return self.snake_id
 
 	def move(self, direct = 0):
 
@@ -71,25 +81,24 @@ class Snake(Object):
 		for block in self.blocks:
 			block.paint(screen);
 
+	## retorna informacoes para ser udada no servidor
+	def getInfo(self):
+		infos = ["set-update",self.getId(),self.x, self.y, self.direct, self.blocks[0].getBgColor(), \
+		self.blocks[0].getBorderColor(), len(self.blocks)]
+
+		for block in self.blocks:
+			infos.append(block.x)
+			infos.append(block.y)
+
+		return infos;
+
 
 if __name__ == "__main__":
 	snake = Snake(False, 20)
+	snake.setId(38229)
 	snake.addBlock(Block(snake, (0, 0), (20, 20)))
 	snake.addBlock(Block(snake, (0,20), (20, 20)))
 	snake.addBlock(Block(snake, (0,40), (20, 20)))
 
-	snake.move(snake.directions['top']);
-	snake.move(snake.directions['right']);
-	snake.move(snake.directions['right']);
-	snake.move(snake.directions['right']);
-	# snake.move(snake.directions['bottom']);
-	# snake.move(snake.directions['bottom']);
-	# snake.move(snake.directions['bottom']);
-	# snake.move(snake.directions['left']);
-
-	i = 0;
-	for block in snake.blocks:
-		print i , "(" , block.x , "," , block. y , ")";
-		i += 1;
-
+	print snake.getInfo();
 
