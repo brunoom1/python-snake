@@ -1,21 +1,39 @@
 #!/usr/bin/python
+#coding: utf-8
 
 import pygame
+
+# mvc
+import controller
 import model
 
 from math import ceil
-from random import random
+
+import socket
+import sys
+import json
+
+import lib
+
 
 class Game(pygame.Rect):
+
+	DEFAULT_BLOCK_SIZE = 20
 
 	speed = 8
 	stage_blocks = []
 	pause_game = True
+	game_id = 0
 	config = {}
 
 	def __init__(self, size, block_s, winstyle=0):
 
+
 		pygame.init()
+
+		self.block_s = block_s;
+
+		self.controllers = []
 
 		## init
 		pygame.Rect.__init__(self, (0, 0) , (size[0], size[1]))
@@ -23,78 +41,56 @@ class Game(pygame.Rect):
 		## init windows
 		self.winstyle = winstyle
 		bestdepth = pygame.display.mode_ok(self.size, self.winstyle, 32)
+
+		## surfaces 
 		self.screen = pygame.display.set_mode(self.size, self.winstyle, bestdepth)
+		self.screenBuffer = pygame.Surface(self.size);
 
 		## init and running
 		self.running = True
 		self.clock = pygame.time.Clock()
 		
-		self.snake = model.Snake(self, block_s)
+		self.snakeController = controller.SnakeController(self)
+		self.blockFreeController = controller.BlockFreeController(self)
 
-		self.eventManager = model.EventManager(self);
+		self.controllers.append(self.snakeController)
+		self.controllers.append(self.blockFreeController)
+
+		self.eventManager = model.EventManager(self.snakeController)
 		self.eventManager.start() 
 
-		self.screenBuffer = pygame.Surface(self.size);
+		self.serverComunicate = lib.ServerComunicate(self)
+		self.serverComunicate.start()
 
-		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 6 * block_s)) )
-		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 5 * block_s)) )
-		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 4 * block_s)) )
-		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 3 * block_s)) )
-		self.snake.addBlock(model.Block(self.snake, (3 * block_s, 2 * block_s)) )
-
-		# carrega primeiro stage
-		self.load_stage(0, 20)
-
-
-		block_free = False
+		# contador de iterações
 		count = 0
 		while(self.running):
+			# apaga tudo
+			self.eraser()
 
-			self.screenBuffer.fill([0,0,0])
+			# atualiza
+			self.update()			
 
-			if(block_free == False):
+			# pinta
+			self.paint()
 
-				pos = ( int(random() * (self.size[0] / block_s)) * block_s , int(random() * (self.size[1] / block_s)) * block_s )
-				block_free = model.BlockFree(False, pos)
-
-				while(block_free.collidelist(self.stage_blocks) != -1):
-					pos = ( int(random() * (self.size[0] / block_s)) * block_s , int(random() * (self.size[1] / block_s)) * block_s )
-					block_free = model.BlockFree(False, pos)
-
-			if(block_free != False):
-				block_free.paint(self.screenBuffer)
-
-				if(self.snake.blocks[0].colliderect(block_free)):
-					self.snake.addBlock(model.Block([], block_free.getPos()))
-					block_free = False
-
-			for block in self.stage_blocks:
-				block.paint(self.screenBuffer)
-
-			self.snake.paint(self.screenBuffer)
-
-			# pass screenBuffer for real screen
-			self.screen.blit(self.screenBuffer, (0, 0))
-
-			# update display
-			pygame.display.flip();
-
-			if(self.pause_game): continue;
-
-
-			# move snaker
-			self.snake.move(self.snake.direct)
-
-			# test collision
-
-			index = self.snake.blocks[0].collidelist(self.stage_blocks)
-			index2 = self.snake.blocks[0].collidelist(self.snake.blocks[1:-1])
-
-			if index != -1 or index2 != -1:
-				if(isinstance(self.stage_blocks[index], model.Brick)):
-					self.running = False
-
+			# atrasa um certo tempo
 			self.clock.tick(self.speed)
+
+	def eraser(self):
+		self.screenBuffer.fill([0,0,0])
+
+	def update(self):
+		# update controllers
+		for control in self.controllers:
+			control.update()
+
+	def paint(self):
+		# pass screenBuffer for real screen
+		self.screen.blit(self.screenBuffer, (0, 0))
+
+		# update display
+		pygame.display.flip();
 
 
 	def __done__(self):
@@ -117,7 +113,7 @@ class Game(pygame.Rect):
 		line2 = f.readline().split(',')
 
 		self.config['snake'] = line1
-		self.config['game'] = line2
+		# self.config['game'] = line2
 
 		content = f.read()
 		f.close()
@@ -143,4 +139,4 @@ class Game(pygame.Rect):
 
 ## init game
 if __name__ == '__main__': 
-	game = Game((400, 400), 20)
+	game = Game((400, 400), Game.DEFAULT_BLOCK_SIZE)

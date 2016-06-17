@@ -7,6 +7,7 @@ class Block(Object):
 	parent = False
 	borderColor = [200,200,200]
 	bgColor = [100,50,200]
+
 	i = 0
 
 	def __init__(self, parent, pos = (0,0), size = (20, 20)):

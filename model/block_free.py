@@ -5,8 +5,6 @@ import block;
 class BlockFree(block.Block):
 	sibling = False
 	parent = False
-	borderColor = [200,200,200]
-	bgColor = [100,50,200]
 	i = 0
 
 	def __init__(self, parent, pos = (0,0), size = (20, 20)):
@@ -29,5 +27,9 @@ class BlockFree(block.Block):
 
 		block.Block.paint(self, screen);
 
+	def toBlock(self):
+		self.borderColor = [200,200,200]
+		self.bgColor = [100,50,200]
+		self.__class__ = block.Block
 
 

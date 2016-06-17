@@ -11,9 +11,9 @@ class Snake(Object):
 	blocks = []
 	snake_id = 0
 
-	def __init__(self, game = "", step = 20):
+	def __init__(self, controller = "", step = 20):
 		Object.__init__(self, (0, 0), (0 , 0))
-		self.game = game;
+		self.controller = controller;
 		self.step = step
 		self.snake_id = 0
 
@@ -23,35 +23,43 @@ class Snake(Object):
 	def getId(self):
 		return self.snake_id
 
-	def move(self, direct = 0):
+	def move(self, direct = -1):
 
-		if(self.direct == self.directions['top'] ):
-			self.y -= self.step
+		if(direct != -1):
+			self.setDirect(direct)
+		else: 
+			if(self.direct == self.directions['top'] ):
+				self.y -= self.step
 
-			if(self.y < 0):
-				self.y = self.game.size[1] - self.step
+				if(self.y < 0):
+					self.y = self.controller.parent.size[1] - self.step
 
-		if(self.direct == self.directions['right'] ):
-			self.x += self.step;
+			if(self.direct == self.directions['right'] ):
+				self.x += self.step;
 
-			if(self.x + self.step > self.game.size[0]):
-				self.x = 0
+				if(self.x + self.step > self.controller.parent.size[0]):
+					self.x = 0
 
-		if(self.direct == self.directions['bottom'] ):
-			self.y += self.step;
+			if(self.direct == self.directions['bottom'] ):
+				self.y += self.step;
 
-			if(self.y + self.step > self.game.size[1]):
-				self.y = 0
+				if(self.y + self.step > self.controller.parent.size[1]):
+					self.y = 0
 
-		if(self.direct == self.directions['left'] ):
-			self.x -= self.step;
+			if(self.direct == self.directions['left'] ):
+				self.x -= self.step;
 
-			if(self.x < 0 ):
-				self.x = self.game.size[0] - self.step
+				if(self.x < 0 ):
+					self.x = self.controller.parent.size[0] - self.step
 
-		## move first block 
-		if(len(self.blocks) > 0 and direct != 4): 
-			self.blocks[0].move((self.x, self.y));
+			## move first block 
+			if(len(self.blocks) > 0 and direct != 4): 
+				self.blocks[0].move((self.x, self.y));
+
+	def setPosition(self, x, y):
+		self.x = x
+		self.y = y
+		self.blocks[0].move((self.x, self.y))
 
 	def setDirect(self, direct):
 
@@ -65,12 +73,13 @@ class Snake(Object):
 		total = len(self.blocks)
 		if (total == 0):
 			self.blocks.append(block)
-			self.setPos(block.getPos())
+			block.setParent(self);
 		else:
 			self.blocks[total - 1].setSibling(block);
 			self.blocks.append(block)
+		
+		block.setParent(self.blocks[0]);
 
-		block.setParent(block)
 
 	def getBlocks(self):
 		return self.blocks
@@ -81,14 +90,23 @@ class Snake(Object):
 		for block in self.blocks:
 			block.paint(screen);
 
+	def setInfo(self, info):
+		pass
+
 	## retorna informacoes para ser udada no servidor
 	def getInfo(self):
-		infos = ["set-update",self.getId(),self.x, self.y, self.direct, self.blocks[0].getBgColor(), \
-		self.blocks[0].getBorderColor(), len(self.blocks)]
 
-		for block in self.blocks:
-			infos.append(block.x)
-			infos.append(block.y)
+		infos = { \
+			"id":self.getId(), \
+			"pos": {"x": self.x, "y":self.y}, \
+			"direction": self.direct, \
+			"blocks-info": { \
+				"bgcolor": self.blocks[0].getBgColor(), \
+				"borderColor": self.blocks[0].getBorderColor(), \
+				"blocksLen": len(self.blocks) \
+			} \
+		}
+
 
 		return infos;
 

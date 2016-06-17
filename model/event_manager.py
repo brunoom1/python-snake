@@ -3,29 +3,29 @@ import pygame
 
 ## rodar evento fora do loop principal do sistema
 class EventManager(threading.Thread):
-	def __init__(self, game):
-		self.game = game
 
+	def __init__(self, controller):
+		self.controller = controller
 		threading.Thread.__init__(self);
 
 	def run(self):
 
-		while(self.game.running):
+		while(self.controller.parent.running):
 			evt = pygame.event.wait();
 
 			if(evt.type == pygame.QUIT):
-				self.game.running = False
+				self.controller.parent.running = False
 
 			if evt.type == pygame.KEYDOWN:
 
 				if(evt.key == 273):
-					self.game.snake.setDirect(0);
+					self.controller.move(0);
 				elif( evt.key == 275 ):
-					self.game.snake.setDirect(1);
+					self.controller.move(1);
 				elif( evt.key == 274):
-					self.game.snake.setDirect(2);
+					self.controller.move(2);
 				elif( evt.key == 276):
-					self.game.snake.setDirect(3);
+					self.controller.move(3);
 
-				if(self.game.pause_game and evt.key == 32):
-					self.game.pause_game = False;
+				if(self.controller.parent.pause_game and evt.key == 32):
+					self.controller.parent.pause_game = False;
